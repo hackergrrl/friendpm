@@ -1,0 +1,12 @@
+USAGE:
+
+  friendpm init
+
+    Scans your npm cache and builds an index. Run this before using 'friendpm
+    install'.
+
+  friendpm i, install [-S] [-D]
+
+    Works like `npm install`. Accepts a package name to install from someone on
+    the local network.
+
