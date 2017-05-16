@@ -1,0 +1,22 @@
+{
+  "name": "friendpm",
+  "description": "share all of the node packages on your computer's cache with your friends via LAN and p2p networks",
+  "author": "Stephen Whitmore <sww@eight.net>",
+  "version": "0.0.0",
+  "repository": {
+    "url": "git://github.com/noffle/friendpm.git"
+  },
+  "homepage": "https://github.com/noffle/friendpm",
+  "bugs": "https://github.com/noffle/friendpm/issues",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard"
+  },
+  "keywords": [],
+  "dependencies": {
+  },
+  "devDependencies": {
+    "standard": "~8.3.0"
+  },
+  "license": "ISC"
+}
