@@ -36,9 +36,9 @@ module.exports = function () {
   return t
 }
 
-var s = module.exports()
-s.on('data', function (p) {
-  // process.stdout.write('.')
-  console.log(p)
-})
+// var s = module.exports()
+// s.on('data', function (p) {
+//   // process.stdout.write('.')
+//   console.log(p)
+// })
 

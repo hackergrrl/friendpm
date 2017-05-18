@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var comandante = require('comandante')
 var fs = require('fs')
 var path = require('path')
 var spawn = require('child_process').spawn
@@ -8,6 +7,7 @@ var config = require('application-config-path')
 var homedir = require('os').homedir
 var scan = require('../scan-cache')
 var through = require('through2')
+var createServer = require('../server')
 
 if (process.argv.length === 2) {
   printUsage()
@@ -21,17 +21,26 @@ switch (process.argv[2]) {
     break
   case 'install':
   case 'i':
-    console.log('TODO')
+    var args = ['--registry', 'http://localhost:9001']
+    args = args.concat(process.argv.slice(2))
+    spawn('npm', args, {stdio:'inherit'})
     break
   // TODO publish to cache + index
   case 'publish':
-    console.log('TODO')
+    // TODO issue! npm will invalidate the cache after publish, so my write to '.cache.json' needs to come AFTER the npm command runs, I think
+    if (!isNpmrcReady()) {
+      console.log('init\'ing..')
+      initNpmrc()
+    }
+
+    var args = ['--registry', 'http://localhost:9001', '-d', '--cache-min=Infinity']
+    args = args.concat(process.argv.slice(2))
+    spawn('npm', args, {stdio:'inherit'})
     break
   case 'share':
-    console.log('TODO')
-    // createServer(function (err, server) {
-    //   console.log('listening on http://0.0.0.0:9000')
-    // })
+    createServer(function (err, server) {
+      console.log('listening on http://0.0.0.0:9001')
+    })
     break
   default:
     printUsage()
@@ -44,11 +53,11 @@ function printUsage () {
 
 function isNpmrcReady () {
   var npmrc = fs.readFileSync(path.join(homedir(), '.npmrc'))
-  return npmrc.indexOf('//localhost:9000/:_authToken=baz') !== -1
+  return npmrc.indexOf('//localhost:9001/:_authToken=baz') !== -1
 }
 
 function initNpmrc () {
-  fs.appendFileSync(path.join(homedir(), '.npmrc'), '//localhost:9000/:_authToken=baz')
+  fs.appendFileSync(path.join(homedir(), '.npmrc'), '//localhost:9001/:_authToken=baz')
 }
 
 function doInit () {
