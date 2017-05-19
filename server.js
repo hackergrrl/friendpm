@@ -45,7 +45,7 @@ module.exports = function (done) {
       })
     } else if (req.method === 'PUT') {
       console.log('wants to publish', match.params.pkg)
-      body(req, function (err, data) {
+      body(req, { limit: 100000000 }, function (err, data) {
         if (err) {
           console.log('err', err)
           res.statusCode = 500
