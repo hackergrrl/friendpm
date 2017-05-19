@@ -9,7 +9,12 @@ module.exports = function () {
     if (fs.existsSync(cacheMeta)) {
       done(null, fs.readFileSync(cacheMeta, 'utf8'))
     } else {
-      done(new Error('could not find ' + pkg))
+      cacheMeta = path.join('/home/sww/.npm/localhost_9001', pkg, '.cache.json')
+      if (fs.existsSync(cacheMeta)) {
+        done(null, fs.readFileSync(cacheMeta, 'utf8'))
+      } else {
+        done(new Error('could not find ' + pkg))
+      }
     }
   }
 

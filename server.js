@@ -82,15 +82,20 @@ module.exports = function (done) {
       console.log('wrote tarball')
 
       console.log(data)
+      var pkgJson = JSON.stringify(data.versions[data['dist-tags'].latest])
+      var cacheJson = JSON.stringify(data)
+
       mkdirp.sync(path.join(dir, 'package'))
-      fs.writeFileSync(path.join(dir, 'package', 'package.json'), data, 'utf8')
+      fs.writeFileSync(path.join(dir, 'package', 'package.json'), pkgJson, 'utf8')
       console.log('wrote meta')
 
       // write cache entry
-      var cacheDir = path.join('/home/sww/.npm/localhost_9001', pkg)
-      mkdirp.sync(cacheDir)
-      fs.writeFileSync(path.join(cacheDir, '.cache.json'), data, 'utf8')
-      console.log('wrote cache meta', cacheDir)
+      setTimeout(function () {
+        var cacheDir = path.join('/home/sww/.npm/localhost_9001', pkg)
+        mkdirp.sync(cacheDir)
+        fs.writeFileSync(path.join(cacheDir, '.cache.json'), cacheJson, 'utf8')
+        console.log('wrote cache meta', cacheDir)
+      }, 1000)
 
       done()
     })
