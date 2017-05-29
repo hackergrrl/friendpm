@@ -1,8 +1,7 @@
 # friendpm
 
-> Share all of the node packages in your cache with your friends via LAN and P2P networks.
-
-Very **Work-in-Progress**.
+> Share, publish, and install node packages from your cache over the local
+> network.
 
 ## Install
 
@@ -11,6 +10,30 @@ With [npm](https://npmjs.org/) installed, run
 ```
 $ npm install --global friendpm
 ```
+
+## Usage
+
+```
+  friendpm i, install [-S] [-D]
+
+    Works like `npm install`. Accepts a package name to install from someone on
+    the local network, or your own cache if none are found.
+
+  friendpm publish
+
+    Works like `npm publish`, except your package is only published to your
+    local cache. It can be installed immediately after by you or others on the
+    network (if you're running `friendpm share`).
+
+  friendpm share
+
+    Run a tiny npm registry that other `friendpm` users can discover and use
+    over the local network.
+
+```
+
+**Alpha Note**: For now, you'll need to be running `friendpm share` for the
+`install` and `publish` commands to work.
 
 ## License
 
