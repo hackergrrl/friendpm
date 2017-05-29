@@ -18,7 +18,6 @@
   "keywords": [],
   "dependencies": {
     "body": "^5.1.0",
-    "comandante": "0.0.1",
     "mkdirp": "^0.5.1",
     "routes": "^2.1.0"
   },

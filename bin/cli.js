@@ -3,10 +3,8 @@
 var fs = require('fs')
 var path = require('path')
 var spawn = require('child_process').spawn
-var config = require('application-config-path')
 var homedir = require('os').homedir
 var scan = require('../scan-cache')
-var through = require('through2')
 var createServer = require('../server')
 
 if (process.argv.length === 2) {
@@ -15,10 +13,6 @@ if (process.argv.length === 2) {
 }
 
 switch (process.argv[2]) {
-  // TODO how to deal with cache updates after initial 'init'?
-  case 'init':
-    doInit()
-    break
   case 'install':
   case 'i':
     var args = ['--registry', 'http://localhost:9001']
@@ -58,13 +52,4 @@ function isNpmrcReady () {
 
 function initNpmrc () {
   fs.appendFileSync(path.join(homedir(), '.npmrc'), '//localhost:9001/:_authToken=baz')
-}
-
-function doInit () {
-  scan().pipe(through(function (entry, enc, next) {
-    console.log(entry)
-    next()
-  }, function (flush) {
-    // ...
-  }))
 }
