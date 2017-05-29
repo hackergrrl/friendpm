@@ -32,8 +32,14 @@ $ npm install --global friendpm
 
 ```
 
-**Alpha Note**: For now, you'll need to be running `friendpm share` for the
-`install` and `publish` commands to work.
+## Caveats
+
+1. For now, you'll need to be running `friendpm share` for the `install` and
+   `publish` commands to work.
+
+2. LAN discovery isn't implemented yet. You can, however, use `npm install
+   --registry=<FRIEND'S IP>:9001 some_package` to install from your friend's
+   cache over the local network for now.
 
 ## License
 
