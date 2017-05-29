@@ -1,13 +1,14 @@
 var through = require('through2')
 var fs = require('fs')
-var homedir = require('os').homedir
 var path = require('path')
+
+var CACHE_DIR = process.env.npm_config_cache
 
 module.exports = function () {
   var t = through.obj()
 
   process.nextTick(function () {
-    var root = path.join(homedir(), '.npm')
+    var root = CACHE_DIR
     var dirs = fs.readdirSync(root)
     console.log('found', dirs.length)
     dirs.forEach(function (pkgDir) {
