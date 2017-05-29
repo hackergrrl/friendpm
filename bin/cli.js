@@ -4,7 +4,6 @@ var fs = require('fs')
 var path = require('path')
 var spawn = require('child_process').spawn
 var homedir = require('os').homedir
-var scan = require('../scan-cache')
 var createServer = require('../server')
 
 if (process.argv.length === 2) {
