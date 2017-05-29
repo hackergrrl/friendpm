@@ -3,6 +3,9 @@
   "description": "share all of the node packages on your computer's cache with your friends via LAN and p2p networks",
   "author": "Stephen Whitmore <sww@eight.net>",
   "version": "0.0.1",
+  "bin": {
+    "friendpm": "bin/cli.js"
+  },
   "repository": {
     "url": "git://github.com/noffle/friendpm.git"
   },
