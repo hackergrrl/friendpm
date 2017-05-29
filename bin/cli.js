@@ -18,16 +18,16 @@ switch (process.argv[2]) {
     args = args.concat(process.argv.slice(2))
     spawn('npm', args, {stdio:'inherit'})
     break
-  // TODO publish to cache + index
   case 'publish':
-    // TODO issue! npm will invalidate the cache after publish, so my write to '.cache.json' needs to come AFTER the npm command runs, I think
     if (!isNpmrcReady()) {
       console.log('init\'ing..')
       initNpmrc()
     }
 
-    var args = ['--registry', 'http://localhost:9001', '-d', '--cache-min=Infinity']
-    args = args.concat(process.argv.slice(2))
+    var args = [
+      '--registry', 'http://localhost:9001',
+      '--cache-min=Infinity'
+    ].concat(process.argv.slice(2))
     spawn('npm', args, {stdio:'inherit'})
     break
   case 'share':
