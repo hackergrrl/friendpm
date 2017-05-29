@@ -1,15 +1,16 @@
 var fs = require('fs')
 var path = require('path')
+var homedir = require('os').homedir
 
 module.exports = function () {
   var reg = {}
 
   reg.fetchMetadata = function (pkg, done) {
-    var cacheMeta = path.join('/home/sww/.npm/registry.npmjs.org', pkg, '.cache.json')
+    var cacheMeta = path.join(homedir(), '.npm', 'registry.npmjs.org', pkg, '.cache.json')
     if (fs.existsSync(cacheMeta)) {
       done(null, fs.readFileSync(cacheMeta, 'utf8'))
     } else {
-      cacheMeta = path.join('/home/sww/.npm/localhost_9001', pkg, '.cache.json')
+      cacheMeta = path.join(homedir(), '.npm', 'localhost_9001', pkg, '.cache.json')
       if (fs.existsSync(cacheMeta)) {
         done(null, fs.readFileSync(cacheMeta, 'utf8'))
       } else {

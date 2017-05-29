@@ -5,6 +5,7 @@ var routes = require('routes')
 var url = require('url')
 var body = require('body')
 var mkdirp = require('mkdirp')
+var homedir = require('os').homedir
 
 module.exports = function (done) {
   var router = routes()
@@ -75,7 +76,7 @@ module.exports = function (done) {
 
     var pkg = data.name
     var version = data['dist-tags'].latest
-    var dir = path.join('/home/sww/.npm', pkg, version)
+    var dir = path.join(homedir(), '.npm', pkg, version)
 
     writeAttachments(pkg, attachments, dir, function (err) {
       if (err) return done(err)
@@ -91,7 +92,7 @@ module.exports = function (done) {
 
       // write cache entry
       setTimeout(function () {
-        var cacheDir = path.join('/home/sww/.npm/localhost_9001', pkg)
+        var cacheDir = path.join(homedir(), '.npm', 'localhost_9001', pkg)
         mkdirp.sync(cacheDir)
         fs.writeFileSync(path.join(cacheDir, '.cache.json'), cacheJson, 'utf8')
         console.log('wrote cache meta', cacheDir)
