@@ -13,6 +13,10 @@ $ npm install --global friendpm
 
 ## Usage
 
+Use the `friendpm` command just like `npm`, except the `install` and `publish`
+subcommands operate on your machine's cache and other friendpm users on the
+local network, instead of the NPM central servers.
+
 ```
   friendpm i, install [-S] [-D]
 
