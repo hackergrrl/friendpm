@@ -2,7 +2,7 @@
   "name": "friendpm",
   "description": "share all of the node packages on your computer's cache with your friends via LAN and p2p networks",
   "author": "Stephen Whitmore <sww@eight.net>",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "bin": {
     "friendpm": "bin/cli.js"
   },
