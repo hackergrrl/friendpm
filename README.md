@@ -6,7 +6,7 @@
 ## Upcoming: 1.0.0 Release
 
 There are still a bunch of things to do before a `1.0.0` release: [here is an
-issue]([https://github.com/noffle/friendpm/issues/2) for it. Contributions
+issue](https://github.com/noffle/friendpm/issues/2) for it. Contributions
 *very* welcome! Ask if you're unsure about anything.
 
 ## Install
