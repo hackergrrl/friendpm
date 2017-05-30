@@ -51,6 +51,8 @@ local network, instead of the NPM central servers.
    --registry=<FRIEND'S IP>:9001 some_package` to install from your friend's
    cache over the local network for now.
 
+3. `npm@3` and `npm@4` only. Untested with `npm@5`.
+
 ## License
 
 ISC
