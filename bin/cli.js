@@ -14,9 +14,19 @@ if (process.argv.length === 2) {
 switch (process.argv[2]) {
   case 'install':
   case 'i':
-    var args = ['--registry', 'http://localhost:9001']
-    args = args.concat(process.argv.slice(2))
-    spawn('npm', args, {stdio:'inherit'})
+    startServerIfNeeded(function (err, server) {
+      if (err) throw err
+
+      var args = ['--registry', 'http://localhost:9001']
+      args = args.concat(process.argv.slice(2))
+      var p = spawn('npm', args, {stdio:'inherit'})
+
+      p.on('close', function (code, signal) {
+        if (server) {
+          server.close()
+        }
+      })
+    })
     break
   case 'publish':
     if (!isNpmrcReady()) {
@@ -24,11 +34,21 @@ switch (process.argv[2]) {
       initNpmrc()
     }
 
-    var args = [
-      '--registry', 'http://localhost:9001',
-      '--cache-min=Infinity'
-    ].concat(process.argv.slice(2))
-    spawn('npm', args, {stdio:'inherit'})
+    startServerIfNeeded(function (err, server) {
+      if (err) throw err
+
+      var args = [
+        '--registry', 'http://localhost:9001',
+        '--cache-min=Infinity'
+      ].concat(process.argv.slice(2))
+      var p = spawn('npm', args, {stdio:'inherit'})
+
+      p.on('close', function (code, signal) {
+        if (server) {
+          server.close()
+        }
+      })
+    })
     break
   case 'share':
     createServer(function (err, server) {
@@ -38,6 +58,20 @@ switch (process.argv[2]) {
   default:
     printUsage()
     break
+}
+
+// Start a new friendpm server, if one is not already running.
+// TODO: don't enable mdns if we're creating a new one; user may not want/expect that
+function startServerIfNeeded (done) {
+  createServer(function (err, server) {
+    if (err && err.code === 'EADDRINUSE') {
+      done()
+    } else if (!err) {
+      done(null, server)
+    } else {
+      done(err)
+    }
+  })
 }
 
 function printUsage () {
