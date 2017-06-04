@@ -43,7 +43,6 @@ module.exports = function (opts, done) {
     done(err)
   })
   server.listen(opts.port, function () {
-    mdnsInit()
     done(null, server)
   })
 
