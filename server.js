@@ -5,10 +5,13 @@ var routes = require('routes')
 var url = require('url')
 var body = require('body')
 var mkdirp = require('mkdirp')
+var once = require('once')
 
 var CACHE_DIR = process.env.npm_config_cache
 
 module.exports = function (done) {
+  done = once(done)
+
   var router = routes()
   router.addRoute('/:tarball\.tgz', onTarball)
   router.addRoute('/:pkg', onPackage)
@@ -29,6 +32,7 @@ module.exports = function (done) {
     }
   })
 
+  server.on('error', done)
   server.listen(9001, function () {
     done(null, server)
   })
