@@ -6,6 +6,7 @@ var url = require('url')
 var body = require('body')
 var mkdirp = require('mkdirp')
 var once = require('once')
+var debug = require('debug')('friendpm')
 
 var CACHE_DIR = process.env.npm_config_cache
 
@@ -20,7 +21,7 @@ module.exports = function (done) {
   var registry = require('./local-cache')()
 
   var server = http.createServer(function (req, res) {
-    console.log(req.method.toUpperCase() + ' ' + req.url)
+    debug(req.method.toUpperCase() + ' ' + req.url)
 
     var dir = url.parse(req.url).pathname
     var match = router.match(dir)
@@ -50,10 +51,10 @@ module.exports = function (done) {
         res.end()
       })
     } else if (req.method === 'PUT') {
-      console.log('wants to publish', match.params.pkg)
+      debug('wants to publish', match.params.pkg)
       body(req, { limit: 100000000 }, function (err, data) {
         if (err) {
-          console.log('err', err)
+          debug('err', err)
           res.statusCode = 500
           res.end()
           return
@@ -85,22 +86,22 @@ module.exports = function (done) {
 
     writeAttachments(pkg, attachments, dir, function (err) {
       if (err) return done(err)
-      console.log('wrote tarball')
+      debug('wrote tarball')
 
-      console.log(data)
+      debug(data)
       var pkgJson = JSON.stringify(data.versions[data['dist-tags'].latest])
       var cacheJson = JSON.stringify(data)
 
       mkdirp.sync(path.join(dir, 'package'))
       fs.writeFileSync(path.join(dir, 'package', 'package.json'), pkgJson, 'utf8')
-      console.log('wrote meta')
+      debug('wrote meta')
 
       // write cache entry
       setTimeout(function () {
         var cacheDir = path.join(CACHE_DIR, 'localhost_9001', pkg)
         mkdirp.sync(cacheDir)
         fs.writeFileSync(path.join(cacheDir, '.cache.json'), cacheJson, 'utf8')
-        console.log('wrote cache meta', cacheDir)
+        debug('wrote cache meta', cacheDir)
       }, 1000)
 
       done()
@@ -114,11 +115,11 @@ module.exports = function (done) {
     Object.keys(attachments).forEach(function (filename) {
       var data = new Buffer(attachments[filename].data, 'base64')
       mkdirp(dir, function (err) {
-        console.log('created', dir)
+        debug('created', dir)
         // TODO: handle err
-        console.log('writing package.tgz')
+        debug('writing package.tgz')
         fs.writeFileSync(path.join(dir, 'package.tgz'), data, 'utf8')
-        console.log('end write to', path.join(dir, 'package.tgz'))
+        debug('end write to', path.join(dir, 'package.tgz'))
         if (--pending === 0) return done(null)
       })
     })
@@ -126,17 +127,17 @@ module.exports = function (done) {
   }
 
   function onAddUser (req, res, match) {
-    console.log('wants to add user')
+    debug('wants to add user')
     body(req, function (err, data) {
       registry.addUser({
         name: data.name,
         email: data.email
       }, function (err) {
         if (err) {
-          console.log('wants to add user: err')
+          debug('wants to add user: err')
           res.statusCode = 404
         } else {
-          console.log('wants to add user: success')
+          debug('wants to add user: success')
           res.statusCode = 201
         }
         res.end()
@@ -146,10 +147,10 @@ module.exports = function (done) {
 
   function onTarball (req, res, match) {
     var tarball = match.params.tarball + '.tgz'
-    console.log('getting tarball', tarball)
+    debug('getting tarball', tarball)
     var rs = store.createReadStream(tarball)
     rs.on('error', function (err) {
-      console.log('unable to get tarball', tarball, err)
+      debug('unable to get tarball', tarball, err)
       res.statusCode = 404
       rs.unpipe(res)
       res.write(err.toString() + '\n')

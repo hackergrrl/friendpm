@@ -19,6 +19,7 @@
   "keywords": [],
   "dependencies": {
     "body": "^5.1.0",
+    "debug": "^2.6.8",
     "mkdirp": "^0.5.1",
     "routes": "^2.1.0"
   },
