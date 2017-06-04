@@ -10,7 +10,13 @@ var debug = require('debug')('friendpm')
 
 var CACHE_DIR = process.env.npm_config_cache
 
-module.exports = function (done) {
+module.exports = function (opts, done) {
+  if (typeof opts === 'function' && !done) {
+    done = opts
+    opts = {}
+  }
+  opts = opts || {}
+  opts.port = opts.port || 9001
   done = once(done)
 
   var router = routes()
@@ -33,8 +39,11 @@ module.exports = function (done) {
     }
   })
 
-  server.on('error', done)
-  server.listen(9001, function () {
+  server.on('error', function (err) {
+    done(err)
+  })
+  server.listen(opts.port, function () {
+    mdnsInit()
     done(null, server)
   })
 
@@ -176,7 +185,7 @@ function mapHashesToMetadata (pkg, hashes) {
       version: version,
       dist: {
         shasum: hashes[version],
-        tarball: 'http://localhost:9001/' + hashes[version] + '.tgz'
+        tarball: 'http://localhost:' + opts.port + '/' + hashes[version] + '.tgz'
       },
     }
   })

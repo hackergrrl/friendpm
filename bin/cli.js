@@ -5,26 +5,29 @@ var path = require('path')
 var spawn = require('child_process').spawn
 var homedir = require('os').homedir
 var createServer = require('../server')
+var args = require('minimist')(process.argv)
 
-if (process.argv.length === 2) {
+if (args._.length === 2) {
   printUsage()
   return
 }
 
-switch (process.argv[2]) {
+var port = args.p || args.port || 9001
+
+switch (args._[2]) {
   case 'install':
   case 'i':
-    startServerIfNeeded(function (err, server) {
+    startServerIfNeeded(port, function (err, server) {
       if (err) throw err
 
-      var args = ['--registry', 'http://localhost:9001']
-      args = args.concat(process.argv.slice(2))
-      var p = spawn('npm', args, {stdio:'inherit'})
+      var npmArgs = ['--registry', 'http://localhost:' + port]
+      npmArgs = npmArgs.concat(args._.slice(2))
+      var p = spawn('npm', npmArgs, {stdio:'inherit'})
 
       p.on('close', function (code, signal) {
         if (server) {
           server.close()
-        }
+        } else process.exit(0)
       })
     })
     break
@@ -34,25 +37,25 @@ switch (process.argv[2]) {
       initNpmrc()
     }
 
-    startServerIfNeeded(function (err, server) {
+    startServerIfNeeded(port, function (err, server) {
       if (err) throw err
 
-      var args = [
-        '--registry', 'http://localhost:9001',
+      var npmArgs = [
+        '--registry', 'http://localhost:' + port,
         '--cache-min=Infinity'
-      ].concat(process.argv.slice(2))
-      var p = spawn('npm', args, {stdio:'inherit'})
+      ].concat(args._.slice(2))
+      var p = spawn('npm', npmArgs, {stdio:'inherit'})
 
       p.on('close', function (code, signal) {
         if (server) {
           server.close()
-        }
+        } else process.exit(0)
       })
     })
     break
   case 'share':
-    createServer(function (err, server) {
-      console.log('listening on http://0.0.0.0:9001')
+    createServer({port:port}, function (err, server) {
+      console.log('listening on http://0.0.0.0:' + port)
     })
     break
   default:
@@ -62,8 +65,8 @@ switch (process.argv[2]) {
 
 // Start a new friendpm server, if one is not already running.
 // TODO: don't enable mdns if we're creating a new one; user may not want/expect that
-function startServerIfNeeded (done) {
-  createServer(function (err, server) {
+function startServerIfNeeded (port, done) {
+  createServer({port:port}, function (err, server) {
     if (err && err.code === 'EADDRINUSE') {
       done()
     } else if (!err) {
