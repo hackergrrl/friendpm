@@ -7,6 +7,8 @@ var body = require('body')
 var mkdirp = require('mkdirp')
 var once = require('once')
 var debug = require('debug')('friendpm')
+var Bonjour = require('bonjour')
+var url = require('url')
 
 var CACHE_DIR = process.env.npm_config_cache
 
@@ -19,12 +21,17 @@ module.exports = function (opts, done) {
   opts.port = opts.port || 9001
   done = once(done)
 
+  var bonjour = Bonjour()
+  var bonjourBrowser = null
+  var bonjourName = 'friendpm-' + (''+Math.random()).substring(2, 8)
+
   var router = routes()
   router.addRoute('/:tarball\.tgz', onTarball)
   router.addRoute('/:pkg', onPackage)
   router.addRoute('/-/user/org.couchdb.user\::user', onAddUser)
 
   var registry = require('./local-cache')()
+  var swarm = require('./mdns-swarm')()
 
   var server = http.createServer(function (req, res) {
     debug(req.method.toUpperCase() + ' ' + req.url)
@@ -46,17 +53,66 @@ module.exports = function (opts, done) {
     done(null, server)
   })
 
+  function mdnsInit () {
+    mdnsBroadcast()
+
+    bonjourBrowser = mdnsSearch()
+    var peers = []
+    bonjourBrowser.on('up', function (service) {
+      if (service.name === bonjourName) return
+      console.log('bonjour :: found a friendpm peer:', service)
+      swarm.addPeerService(service)
+    })
+    bonjourBrowser.on('down', function (service) {
+      if (service.name === bonjourName) return
+      console.log('bonjour :: said goodbye to a friendpm peer:', service)
+      swarm.removePeerService(service)
+    })
+  }
+
+  function mdnsBroadcast () {
+    console.log('bonjour :: publishing')
+    bonjour.publish({ name: bonjourName, type: 'friendpm', port: opts.port })
+  }
+
+  function mdnsSearch (foundCb) {
+    console.log('bonjour :: searching')
+    return bonjour.find({ type: 'friendpm' })
+  }
+
   function onPackage (req, res, match) {
     if (req.method === 'GET') {
-      var pkg = match.params.pkg
+      var q = url.parse(req.url, true)
+      var shouldUseSwarm = Number(url.parse(req.url, true).query.ttl) !== 0
+
+      var pkg = decodeURI(match.params.pkg)
       registry.fetchMetadata(pkg, function (err, data) {
-        if (err) {
+        if (shouldUseSwarm) err = {notFound:true}  // TEMP
+        if (err && err.notFound) {
+          if (shouldUseSwarm) {
+            swarm.fetchMetadata(pkg, function (err, data) {
+              if (err) {
+                res.statusCode = 404
+                res.end()
+              } else {
+                res.write(data)
+                res.statusCode = 201
+                res.end()
+              }
+            })
+          } else {
+            res.statusCode = 404
+            res.end()
+            return
+          }
+        } else if (err) {
           res.statusCode = 404
+          res.end()
         } else {
           res.write(data)
           res.statusCode = 201
+          res.end()
         }
-        res.end()
       })
     } else if (req.method === 'PUT') {
       debug('wants to publish', match.params.pkg)
