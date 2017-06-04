@@ -66,7 +66,7 @@ switch (args._[2]) {
 // Start a new friendpm server, if one is not already running.
 // TODO: don't enable mdns if we're creating a new one; user may not want/expect that
 function startServerIfNeeded (port, done) {
-  createServer({port:port}, function (err, server) {
+  createServer({port:port, skipPublish: true}, function (err, server) {
     if (err && err.code === 'EADDRINUSE') {
       done()
     } else if (!err) {

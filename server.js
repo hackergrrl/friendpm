@@ -19,6 +19,7 @@ module.exports = function (opts, done) {
   }
   opts = opts || {}
   opts.port = opts.port || 9001
+  opts.skipPublish = opts.skipPublish || false
   done = once(done)
 
   var bonjour = Bonjour()
@@ -56,7 +57,7 @@ module.exports = function (opts, done) {
   })
 
   function mdnsInit () {
-    mdnsBroadcast()
+    if (!opts.skipPublish) mdnsBroadcast()
 
     bonjourBrowser = mdnsSearch()
     var peers = []
