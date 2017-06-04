@@ -1,5 +1,6 @@
 var fs = require('fs')
 var path = require('path')
+var debug = require('debug')('friendpm')
 
 var CACHE_DIR = process.env.npm_config_cache
 
@@ -14,7 +15,7 @@ module.exports = function (opts) {
     pkg = pkg.replace('/', '_252f')
 
     var cacheMeta = path.join(CACHE_DIR, 'registry.npmjs.org', pkg, '.cache.json')
-    console.log('path', cacheMeta)
+    debug('local cache :: path', cacheMeta)
     if (fs.existsSync(cacheMeta)) {
       var data = JSON.parse(fs.readFileSync(cacheMeta, 'utf8'))
       fixTarballUrl(data, 'localhost:' + opts.port)
@@ -32,14 +33,14 @@ module.exports = function (opts) {
   }
 
   reg.getTarballReadStream = function (tarball, done) {
-    console.log('want tarball', tarball)
+    debug('local cache :: want tarball', tarball)
     var version = tarball.match(/.*-(\d\.\d\.\d).tgz/)[1]
     var pkg = tarball.match(/(.*)-\d\.\d\.\d.tgz/)[1]
-    console.log('version', version)
-    console.log('pkg', pkg)
+    debug('local cache :: version', version)
+    debug('local cache :: pkg', pkg)
 
     var cacheTarball = path.join(CACHE_DIR, pkg, version, 'package.tgz')
-    console.log('path', cacheTarball)
+    debug('path', cacheTarball)
     if (fs.existsSync(cacheTarball)) {
       done(null, fs.createReadStream(cacheTarball))
     } else {

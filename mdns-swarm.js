@@ -2,6 +2,7 @@ var fs = require('fs')
 var path = require('path')
 var http = require('http')
 var concat = require('concat-stream')
+var debug = require('debug')('friendpm')
 
 module.exports = function () {
   var peers = []
@@ -26,7 +27,7 @@ module.exports = function () {
         port: peerInfo.port,
         path: '/' + encodeURI(pkg).replace('/', '%2f') + '?ttl=0'
       }, function (res) {
-        console.log('GET', pkg, res.statusCode)
+        debug('GET', pkg, res.statusCode)
         if (res.statusCode === 200) responses.push(res)
         if (--pending === 0) processResponses()
       })

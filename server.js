@@ -63,23 +63,23 @@ module.exports = function (opts, done) {
     var peers = []
     bonjourBrowser.on('up', function (service) {
       if (service.name === bonjourName) return
-      console.log('bonjour :: found a friendpm peer:', service)
+      debug('bonjour :: found a friendpm peer:', service)
       swarm.addPeerService(service)
     })
     bonjourBrowser.on('down', function (service) {
       if (service.name === bonjourName) return
-      console.log('bonjour :: said goodbye to a friendpm peer:', service)
+      debug('bonjour :: said goodbye to a friendpm peer:', service)
       swarm.removePeerService(service)
     })
   }
 
   function mdnsBroadcast () {
-    console.log('bonjour :: publishing')
+    debug('bonjour :: publishing')
     bonjour.publish({ name: bonjourName, type: 'friendpm', port: opts.port })
   }
 
   function mdnsSearch (foundCb) {
-    console.log('bonjour :: searching')
+    debug('bonjour :: searching')
     return bonjour.find({ type: 'friendpm' })
   }
 
