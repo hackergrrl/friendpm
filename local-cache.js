@@ -15,12 +15,9 @@ module.exports = function () {
       if (fs.existsSync(cacheMeta)) {
         done(null, fs.readFileSync(cacheMeta, 'utf8'))
       } else {
-        done(new Error('could not find ' + pkg))
+        done({ notFound: true })
       }
     }
-  }
-
-  reg.addUser = function (user, done) {
   }
 
   return reg
