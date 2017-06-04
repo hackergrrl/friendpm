@@ -27,10 +27,11 @@ module.exports = function (opts, done) {
 
   var router = routes()
   router.addRoute('/:tarball\.tgz', onTarball)
+  router.addRoute('/:pkg/-/:tarball\.tgz', onTarball)
   router.addRoute('/:pkg', onPackage)
   router.addRoute('/-/user/org.couchdb.user\::user', onAddUser)
 
-  var registry = require('./local-cache')()
+  var cache = require('./local-cache')({port:opts.port})
   var swarm = require('./mdns-swarm')()
 
   var server = http.createServer(function (req, res) {
@@ -50,6 +51,7 @@ module.exports = function (opts, done) {
     done(err)
   })
   server.listen(opts.port, function () {
+    mdnsInit()
     done(null, server)
   })
 
@@ -86,8 +88,8 @@ module.exports = function (opts, done) {
       var shouldUseSwarm = Number(url.parse(req.url, true).query.ttl) !== 0
 
       var pkg = decodeURI(match.params.pkg)
-      registry.fetchMetadata(pkg, function (err, data) {
-        if (shouldUseSwarm) err = {notFound:true}  // TEMP
+      cache.fetchMetadata(pkg, function (err, data) {
+        // if (shouldUseSwarm) err = {notFound:true}  // TEMP
         if (err && err.notFound) {
           if (shouldUseSwarm) {
             swarm.fetchMetadata(pkg, function (err, data) {
@@ -162,7 +164,7 @@ module.exports = function (opts, done) {
 
       // write cache entry
       setTimeout(function () {
-        var cacheDir = path.join(CACHE_DIR, 'localhost_9001', pkg)
+        var cacheDir = path.join(CACHE_DIR, 'localhost_' + opts.port, pkg)
         mkdirp.sync(cacheDir)
         fs.writeFileSync(path.join(cacheDir, '.cache.json'), cacheJson, 'utf8')
         debug('wrote cache meta', cacheDir)
@@ -193,34 +195,23 @@ module.exports = function (opts, done) {
   function onAddUser (req, res, match) {
     debug('wants to add user')
     body(req, function (err, data) {
-      registry.addUser({
-        name: data.name,
-        email: data.email
-      }, function (err) {
-        if (err) {
-          debug('wants to add user: err')
-          res.statusCode = 404
-        } else {
-          debug('wants to add user: success')
-          res.statusCode = 201
-        }
-        res.end()
-      })
+      res.statusCode = 201
+      res.end()
     })
   }
 
   function onTarball (req, res, match) {
     var tarball = match.params.tarball + '.tgz'
     debug('getting tarball', tarball)
-    var rs = store.createReadStream(tarball)
-    rs.on('error', function (err) {
-      debug('unable to get tarball', tarball, err)
-      res.statusCode = 404
-      rs.unpipe(res)
-      res.write(err.toString() + '\n')
-      res.end()
+    cache.getTarballReadStream(tarball, function (err, stream) {
+      if (err) {
+        debug('unable to get tarball', tarball, err)
+        res.statusCode = 404
+        res.end(err.toString() + '\n')
+      } else {
+        stream.pipe(res)
+      }
     })
-    rs.pipe(res)
   }
 
 
