@@ -43,5 +43,34 @@ module.exports = function () {
     }
   }
 
+  reg.getTarballReadStream = function (tarball, done) {
+    console.log('want tarball', tarball)
+    var version = tarball.match(/.*-(\d\.\d\.\d).tgz/)[1]
+    var pkg = tarball.match(/(.*)-\d\.\d\.\d.tgz/)[1]
+    console.log('version', version)
+    console.log('pkg', pkg)
+
+    var responses = []
+    var pending = peers.length
+
+    // Make HTTP requests to all peers (GET /:pkg)
+    peers.forEach(function (peerInfo) {
+      http.get({
+        hostname: peerInfo.addresses[0],
+        port: peerInfo.port,
+        path: '/' + tarball + '?ttl=0'
+      }, function (res) {
+        console.log('GET', pkg, res.statusCode)
+        if (res.statusCode === 200) responses.push(res)
+        if (--pending === 0) processResponses()
+      })
+    })
+
+    function processResponses () {
+      if (responses.length === 0) done({notFound:true})
+      else done(null, responses[0])
+    }
+  }
+
   return reg
 }

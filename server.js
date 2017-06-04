@@ -204,8 +204,22 @@ module.exports = function (opts, done) {
   function onTarball (req, res, match) {
     var tarball = match.params.tarball + '.tgz'
     debug('getting tarball', tarball)
+    var shouldUseSwarm = Number(url.parse(req.url, true).query.ttl) !== 0
+
     cache.getTarballReadStream(tarball, function (err, stream) {
-      if (err) {
+      if (err && err.notFound) {
+        if (shouldUseSwarm) {
+          swarm.getTarballReadStream(tarball, function (err, stream) {
+            if (err) {
+              res.statusCode = 404
+              res.end(err.toString() + '\n')
+            } else stream.pipe(res)
+          })
+        } else {
+          res.statusCode = 404
+          res.end()
+        }
+      } else if (err) {
         debug('unable to get tarball', tarball, err)
         res.statusCode = 404
         res.end(err.toString() + '\n')

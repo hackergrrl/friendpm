@@ -41,7 +41,7 @@ module.exports = function (opts) {
     var cacheTarball = path.join(CACHE_DIR, pkg, version, 'package.tgz')
     console.log('path', cacheTarball)
     if (fs.existsSync(cacheTarball)) {
-      done(null, fs.readFileSync(cacheTarball, 'utf8'))
+      done(null, fs.createReadStream(cacheTarball))
     } else {
       done({ notFound: true })
     }
