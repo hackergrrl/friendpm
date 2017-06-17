@@ -28,7 +28,7 @@
     "routes": "^2.1.0"
   },
   "devDependencies": {
-    "standard": "~8.3.0"
+    "standard": "~10.0.2"
   },
   "license": "ISC"
 }
