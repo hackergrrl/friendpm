@@ -24,6 +24,7 @@
     "debug": "^2.6.8",
     "minimist": "^1.2.0",
     "mkdirp": "^0.5.1",
+    "once": "^1.4.0",
     "routes": "^2.1.0"
   },
   "devDependencies": {
