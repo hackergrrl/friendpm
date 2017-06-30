@@ -7,7 +7,6 @@ var body = require('body')
 var mkdirp = require('mkdirp')
 var once = require('once')
 var debug = require('debug')('friendpm')
-var Bonjour = require('bonjour')
 var url = require('url')
 
 var CACHE_DIR = process.env.npm_config_cache
@@ -22,10 +21,6 @@ module.exports = function (opts, done) {
   opts.skipPublish = opts.skipPublish || false
   done = once(done)
 
-  var bonjour = Bonjour()
-  var bonjourBrowser = null
-  var bonjourName = 'friendpm' + (''+Math.random()).substring(2, 8)
-
   var router = routes()
   router.addRoute('/:tarball\.tgz', onTarball)
   router.addRoute('/:pkg/-/:tarball\.tgz', onTarball)
@@ -33,7 +28,7 @@ module.exports = function (opts, done) {
   router.addRoute('/-/user/org.couchdb.user\::user', onAddUser)
 
   var cache = require('./local-cache')({port:opts.port})
-  var swarm = require('./mdns-swarm')()
+  var swarm = require('./mdns-swarm')({skipPublish:opts.skipPublish})
 
   var server = http.createServer(function (req, res) {
     debug(req.method.toUpperCase() + ' ' + req.url)
@@ -48,40 +43,17 @@ module.exports = function (opts, done) {
     }
   })
 
+  server.terminate = function () {
+    this.close()
+    if (bonjourBrowser) bonjourBrowser.stop()
+  }
+
   server.on('error', function (err) {
     done(err)
   })
   server.listen(opts.port, function () {
-    mdnsInit()
     done(null, server)
   })
-
-  function mdnsInit () {
-    if (!opts.skipPublish) mdnsBroadcast()
-
-    bonjourBrowser = mdnsSearch()
-    var peers = []
-    bonjourBrowser.on('up', function (service) {
-      if (service.name === bonjourName) return
-      debug('bonjour :: found a friendpm peer:', service)
-      swarm.addPeerService(service)
-    })
-    bonjourBrowser.on('down', function (service) {
-      if (service.name === bonjourName) return
-      debug('bonjour :: said goodbye to a friendpm peer:', service)
-      swarm.removePeerService(service)
-    })
-  }
-
-  function mdnsBroadcast () {
-    debug('bonjour :: publishing')
-    bonjour.publish({ name: bonjourName, type: 'friendpm', port: opts.port })
-  }
-
-  function mdnsSearch (foundCb) {
-    debug('bonjour :: searching')
-    return bonjour.find({ type: 'friendpm' })
-  }
 
   function onPackage (req, res, match) {
     if (req.method === 'GET') {

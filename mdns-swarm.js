@@ -3,9 +3,41 @@ var path = require('path')
 var http = require('http')
 var concat = require('concat-stream')
 var debug = require('debug')('friendpm')
+var Bonjour = require('bonjour')
 
-module.exports = function () {
+module.exports = function (opts) {
   var peers = []
+
+  var bonjour = Bonjour()
+  var bonjourBrowser = null
+  var bonjourName = 'friendpm' + (''+Math.random()).substring(2, 8)
+
+  function mdnsInit () {
+    if (!opts.skipPublish) mdnsBroadcast()
+
+    bonjourBrowser = mdnsSearch()
+    console.log('searchin!')
+    bonjourBrowser.on('up', function (service) {
+      if (service.name === bonjourName) return
+      debug('bonjour :: found a friendpm peer:', service)
+      swarm.addPeerService(service)
+    })
+    bonjourBrowser.on('down', function (service) {
+      if (service.name === bonjourName) return
+      debug('bonjour :: said goodbye to a friendpm peer:', service)
+      swarm.removePeerService(service)
+    })
+  }
+
+  function mdnsBroadcast () {
+    debug('bonjour :: publishing')
+    var service = bonjour.publish({ name: bonjourName, type: 'friendpm', port: opts.port })
+  }
+
+  function mdnsSearch (foundCb) {
+    debug('bonjour :: searching')
+    return bonjour.find({ type: 'friendpm' })
+  }
 
   var reg = {
     addPeerService: function (service) {
