@@ -38,9 +38,20 @@ module.exports = function (opts) {
     return bonjour.find({ type: 'friendpm' })
   }
 
+  // 3 seconds to look for peers; be quick!
+  var readyTime = Date.now() + 1000 * 3
+
   var reg = {}
 
   reg.fetchMetadata = function (pkg, done) {
+    var diff = readyTime - Date.now()
+    if (diff > 0) {
+      console.log('waiting', diff, 'ms')
+      return setTimeout(function () {
+        reg.fetchMetadata(pkg, done)
+      }, diff)
+    }
+
     var responses = []
     var pending = peers.length
 
@@ -73,6 +84,14 @@ module.exports = function (opts) {
   }
 
   reg.getTarballReadStream = function (tarball, done) {
+    var diff = readyTime - Date.now()
+    if (diff > 0) {
+      console.log('waiting', diff, 'ms')
+      return setTimeout(function () {
+        reg.fetchMetadata(pkg, done)
+      }, diff)
+    }
+
     console.log('want tarball', tarball)
     var version = tarball.match(/.*-(\d\.\d\.\d).tgz/)[1]
     var pkg = tarball.match(/(.*)-\d\.\d\.\d.tgz/)[1]
