@@ -24,7 +24,7 @@ module.exports = function (opts, done) {
 
   var bonjour = Bonjour()
   var bonjourBrowser = null
-  var bonjourName = 'friendpm-' + (''+Math.random()).substring(2, 8)
+  var bonjourName = 'friendpm' + (''+Math.random()).substring(2, 8)
 
   var router = routes()
   router.addRoute('/:tarball\.tgz', onTarball)
