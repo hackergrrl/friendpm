@@ -25,9 +25,8 @@ switch (args._[2]) {
       var p = spawn('npm', npmArgs, {stdio:'inherit'})
 
       p.on('close', function (code, signal) {
-        if (server) {
-          server.close()
-        } else process.exit(0)
+        console.log('npm closed with code', code, signal)
+        process.exit(0)
       })
     })
     break
@@ -47,9 +46,7 @@ switch (args._[2]) {
       var p = spawn('npm', npmArgs, {stdio:'inherit'})
 
       p.on('close', function (code, signal) {
-        if (server) {
-          server.close()
-        } else process.exit(0)
+        process.exit(0)
       })
     })
     break
