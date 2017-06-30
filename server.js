@@ -28,7 +28,7 @@ module.exports = function (opts, done) {
   router.addRoute('/-/user/org.couchdb.user\::user', onAddUser)
 
   var cache = require('./local-cache')({port:opts.port})
-  var swarm = require('./mdns-swarm')({skipPublish:opts.skipPublish})
+  var swarm = require('./mdns-swarm')(opts)
 
   var server = http.createServer(function (req, res) {
     debug(req.method.toUpperCase() + ' ' + req.url)
@@ -43,9 +43,9 @@ module.exports = function (opts, done) {
     }
   })
 
-  server.terminate = function () {
+  server.terminate = function (done) {
     this.close()
-    if (bonjourBrowser) bonjourBrowser.stop()
+    swarm.close(done)
   }
 
   server.on('error', function (err) {

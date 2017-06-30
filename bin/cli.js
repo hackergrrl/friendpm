@@ -50,8 +50,15 @@ switch (args._[2]) {
     })
     break
   case 'share':
-    createServer({port:port}, function (err, server) {
+    var server = createServer({port:port}, function (err, server) {
       console.log('listening on http://0.0.0.0:' + port)
+    })
+    process.on('SIGINT', function () {
+      console.log('\nUnpublishing mDNS..')
+      server.terminate(function () {
+        console.log('Goodbye!')
+        process.exit()
+      })
     })
     break
   default:

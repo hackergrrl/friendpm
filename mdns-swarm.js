@@ -10,6 +10,7 @@ module.exports = function (opts) {
 
   var bonjour = Bonjour()
   var bonjourBrowser = null
+  var bonjourService = null
   var bonjourName = 'friendpm' + (''+Math.random()).substring(2, 8)
 
   function mdnsInit () {
@@ -30,13 +31,15 @@ module.exports = function (opts) {
 
   function mdnsBroadcast () {
     debug('bonjour :: publishing')
-    var service = bonjour.publish({ name: bonjourName, type: 'friendpm', port: opts.port })
+    bonjourService = bonjour.publish({ name: bonjourName, type: 'friendpm', port: opts.port })
   }
 
   function mdnsSearch (foundCb) {
     debug('bonjour :: searching')
     return bonjour.find({ type: 'friendpm' })
   }
+
+  mdnsInit()
 
   // 3 seconds to look for peers; be quick!
   var readyTime = Date.now() + 1000 * 3
@@ -118,6 +121,10 @@ module.exports = function (opts) {
       if (responses.length === 0) done({notFound:true})
       else done(null, responses[0])
     }
+  }
+
+  reg.close = function (done) {
+    bonjourService.stop(done)
   }
 
   return reg
