@@ -16,16 +16,15 @@ module.exports = function (opts) {
     if (!opts.skipPublish) mdnsBroadcast()
 
     bonjourBrowser = mdnsSearch()
-    console.log('searchin!')
     bonjourBrowser.on('up', function (service) {
       if (service.name === bonjourName) return
       debug('bonjour :: found a friendpm peer:', service)
-      swarm.addPeerService(service)
+      peers.push(service)
     })
     bonjourBrowser.on('down', function (service) {
       if (service.name === bonjourName) return
       debug('bonjour :: said goodbye to a friendpm peer:', service)
-      swarm.removePeerService(service)
+      peers = peers.filter(function (peer) { return peer.name !== service.name })
     })
   }
 
@@ -39,14 +38,7 @@ module.exports = function (opts) {
     return bonjour.find({ type: 'friendpm' })
   }
 
-  var reg = {
-    addPeerService: function (service) {
-      peers.push(service)
-    },
-    removePeerService: function (service) {
-      peers = peers.filter(function (peer) { return peer.name !== service.name })
-    }
-  }
+  var reg = {}
 
   reg.fetchMetadata = function (pkg, done) {
     var responses = []
