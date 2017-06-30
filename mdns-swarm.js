@@ -20,6 +20,10 @@ module.exports = function () {
     var responses = []
     var pending = peers.length
 
+    if (!peers.length) {
+      return done({notFound:true})
+    }
+
     // Make HTTP requests to all peers (GET /:pkg)
     peers.forEach(function (peerInfo) {
       http.get({
