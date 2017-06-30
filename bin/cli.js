@@ -25,7 +25,6 @@ switch (args._[2]) {
       var p = spawn('npm', npmArgs, {stdio:'inherit'})
 
       p.on('close', function (code, signal) {
-        console.log('npm closed with code', code, signal)
         process.exit(0)
       })
     })
