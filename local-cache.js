@@ -2,7 +2,7 @@ var fs = require('fs')
 var path = require('path')
 var debug = require('debug')('friendpm')
 
-var CACHE_DIR = process.env.npm_config_cache
+var CACHE_DIR = process.env.npm_config_cache || path.join(require('os').homedir(), '.npm')
 
 module.exports = function (opts) {
   var reg = {}
