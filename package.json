@@ -20,6 +20,7 @@
   "dependencies": {
     "body": "^5.1.0",
     "bonjour": "^3.5.0",
+    "cacache": "^9.2.9",
     "concat-stream": "^1.6.0",
     "debug": "^2.6.8",
     "minimist": "^1.2.0",

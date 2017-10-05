@@ -10,6 +10,23 @@ module.exports = function (opts) {
   opts.port = opts.port || 9001
 
   reg.fetchMetadata = function (pkg, done) {
+    if (!CACHE_DIR) {
+      // TODO: get npm cache dir
+      var cacheDir = path.join(require('os').homedir(), '.npm', '_cacache')
+      require('cacache').get(cacheDir, 'make-fetch-happen:request-cache:https://registry.npmjs.org/' + pkg)
+        .then((data) => {
+          console.log('got', data.data.toString())
+          done(null, data.data.toString())
+        })
+        .catch(err => {
+          console.log('err', err)
+          done(err)
+        })
+      return
+    }
+
+    // TODO: separate into npm5 and pre-npm5 functions/modules
+
     // npm cache escapes
     pkg = pkg.replace('@', '_40')
     pkg = pkg.replace('/', '_252f')
@@ -38,6 +55,21 @@ module.exports = function (opts) {
     var pkg = tarball.match(/(.*)-\d\.\d\.\d.tgz/)[1]
     debug('local cache :: version', version)
     debug('local cache :: pkg', pkg)
+
+    if (!CACHE_DIR) {
+      var cacheDir = path.join(require('os').homedir(), '.npm', '_cacache')
+      require('cacache').get(cacheDir, 'make-fetch-happen:request-cache:https://registry.npmjs.org/'+pkg+'/-/'+pkg+'-'+version+'.tgz')
+        .then((data) => {
+          console.log('got', data.data.length)
+          done(null, data.data)
+        })
+        .catch(err => {
+          console.log('err', err)
+          done(err)
+        })
+      return
+    }
+
 
     var cacheTarball = path.join(CACHE_DIR, pkg, version, 'package.tgz')
     debug('path', cacheTarball)
