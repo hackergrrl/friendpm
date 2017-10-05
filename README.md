@@ -3,12 +3,6 @@
 > Share, publish, and install node packages from your cache over the local
 > network.
 
-## Upcoming: 1.0.0 Release
-
-There are still a bunch of things to do before a `1.0.0` release: [here is an
-issue](https://github.com/noffle/friendpm/issues/2) for it. Contributions
-*very* welcome! Ask if you're unsure about anything.
-
 ## Install
 
 With [npm](https://npmjs.org/) installed, run
@@ -44,7 +38,12 @@ local network, instead of the NPM central servers.
 
 ## Caveats
 
-1. `npm@3` and `npm@4` only. Untested with `npm@5`.
+At version 5 `npm` changed its internal caching mechanism, making `friendpm` no
+longer work with it. However, your left-over npm cache from when you ran 4 or
+earlier (if you did) still remains and can be shared!
+
+You can downgrade to `npm@4` or earlier, *or* consider donating a patch that
+adds npm5 caching support!
 
 ## License
 
